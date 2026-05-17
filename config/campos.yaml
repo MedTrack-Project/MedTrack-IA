@@ -1,0 +1,11 @@
+path: ../dataset
+
+train: images/train
+val: images/val
+
+names:
+  0: nome
+  1: agente_ativo
+  2: dosagem
+  3: validade
+  4: quantidade

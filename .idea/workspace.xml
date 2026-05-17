@@ -1,11 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="fea62fad-7f8d-49ea-88d0-1c50865085b7" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/config/campos.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/training/augmentation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/training/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ocr_extration.py" beforeDir="false" afterPath="$PROJECT_DIR$/ocr_extration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/campos.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105342.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105342.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105346.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105346.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105349.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105349.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105350.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105350.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105354.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105354.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105356.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105356.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105357.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105357.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105400.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105400.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105404.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105404.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105405.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105405.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105410.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105410.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105414.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105414.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105417.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105417.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105419.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105419.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105420.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105420.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105423.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105423.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105428.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105428.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105429.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105429.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105503.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105503.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105507.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105507.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105509.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105509.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105512.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105512.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105514.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105514.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105516.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105516.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105517.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105517.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105518.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105518.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105519.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105519.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/labels/train/20260329_105520.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/labels/train/20260329_105520.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labeling.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/labeling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ocr_extration.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/ocr_extration.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +70,10 @@
     &quot;accountId&quot;: &quot;0253abdf-d76d-480a-b655-0a4ed37ba0b7&quot;
   }
 }</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0,
   &quot;fromUser&quot;: false
@@ -47,14 +87,18 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.api.executor": "Run",
+    "Python.augmentation.executor": "Run",
+    "Python.labeling.executor": "Run",
     "Python.main.executor": "Run",
     "Python.ocr_extration.executor": "Run",
+    "Python.train.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "10-algoritmo-de-extração-de-dados-the-parserocr-dos-campos-da-caixa-de-remédio",
+    "git-widget-placeholder": "11-generalização-do-modelo-de-ia",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/clara/Documents/GitHub/MedTrack-IA",
     "nodejs_package_manager_path": "npm",
@@ -71,13 +115,16 @@
       <recent name="C:\Users\clara\PycharmProjects\MedTrack-IA\data\raw" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\clara\PycharmProjects\MedTrack-IA\data" />
+      <recent name="C:\Users\clara\Documents\GitHub\MedTrack-IA\models\production" />
+      <recent name="C:\Users\clara\Documents\GitHub\MedTrack-IA\models" />
+      <recent name="C:\Users\clara\Documents\GitHub\MedTrack-IA\models\base" />
+      <recent name="C:\Users\clara\Documents\GitHub\MedTrack-IA\src\api" />
+      <recent name="C:\Users\clara\Documents\GitHub\MedTrack-IA\src\utils" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.32098.74" />
         <option value="bundled-python-sdk-1cd77e80b48f-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.32098.74" />
       </set>
     </attachedChunks>
@@ -92,6 +139,7 @@
       <workItem from="1774567888316" duration="2949000" />
       <workItem from="1774792297598" duration="772000" />
       <workItem from="1776357378866" duration="3824000" />
+      <workItem from="1777066956444" duration="24000" />
     </task>
     <servers />
   </component>
@@ -101,6 +149,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MedTrack_IA$ocr_extration.coverage" NAME="ocr_extration Coverage Results" MODIFIED="1776481659818" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MedTrack_IA$main.coverage" NAME="main Coverage Results" MODIFIED="1776473136015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MedTrack_IA$api.coverage" NAME="api Coverage Results" MODIFIED="1776481787473" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MedTrack_IA$api.coverage" NAME="api Coverage Results" MODIFIED="1776955442989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
