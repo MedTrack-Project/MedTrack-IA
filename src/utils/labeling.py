@@ -1,8 +1,9 @@
 import cv2
 from ultralytics import YOLO
 import os
+import re
 
-CLASSES = ["nome", "agente_ativo", "dosagem", "validade", "quantidade"]
+CLASSES = ["nome", "agente_ativo", "dosagem", "validade", "quantidade", "generico"]
 current_class = 0
 bboxes = []
 drawing = False
@@ -21,7 +22,7 @@ def detect_crop(img_path):
         return None
 
     h_orig, w_orig, _ = img.shape
-    results = model.predict(img, conf=0.2)
+    results = model.predict(img, conf=0.2, verbose=False)  # verbose=False limpa o terminal
     biggest = 0
     better_box = None
 
@@ -49,16 +50,33 @@ def detect_crop(img_path):
         ny2 = min(h_orig, y2 + padding_h)
 
         crop_img = img[ny1:ny2, nx1:nx2]
+
+        max_display_dim = 900
+        ch, cw = crop_img.shape[:2]
+        if max(ch, cw) > max_display_dim:
+            scale = max_display_dim / max(ch, cw)
+            crop_img = cv2.resize(crop_img, (int(cw * scale), int(ch * scale)))
+
         cv2.imwrite('croped_medicine.jpg', crop_img)
         print("Sucesso! Recorte salvo como 'croped_medicine.jpg'")
-
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
-        cv2.rectangle(img, (nx1, ny1), (nx2, ny2), (0, 255, 0), 3)
-        cv2.imwrite('debug_deteccao.jpg', img)
         return crop_img
 
     print("Erro: Nenhum Objeto detectado pelo YOLO")
     return None
+
+
+def redraw_existing_bboxes():
+    global img_view, bboxes
+    h, w = img_view.shape[:2]
+    for box in bboxes:
+        cls_idx, cx, cy, bw, bh = box
+        x1 = int((cx - bw / 2) * w)
+        y1 = int((cy - bh / 2) * h)
+        x2 = int((cx + bw / 2) * w)
+        y2 = int((cy + bh / 2) * h)
+        cv2.rectangle(img_view, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(img_view, CLASSES[cls_idx], (x1, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
 
 def draw_bbox(event, x, y, flags, param):
@@ -90,7 +108,6 @@ def draw_bbox(event, x, y, flags, param):
 
 def save_labels(img_name, bboxes, output_lbl_dir):
     label_path = os.path.join(output_lbl_dir, os.path.splitext(img_name)[0] + ".txt")
-
     try:
         with open(label_path, "w") as f:
             for box in bboxes:
@@ -100,11 +117,7 @@ def save_labels(img_name, bboxes, output_lbl_dir):
         print(f"❌ Erro ao salvar label: {e}")
 
 
-# Pastas de entrada — todas as medicações disponíveis no projeto
-input_dirs = [
-    'data/remedios'
-]
-
+input_dirs = ['../../data/remedios', '../../data/Astro - 500mg', '../../data/Azitromicina-500mg', '../../data/Enavo ODT - 8 mg', '../../data/Puran T4 - 50mcg']
 output_dir = '../../dataset/images/train'
 output_lbl_dir = '../../dataset/labels/train'
 os.makedirs(output_dir, exist_ok=True)
@@ -137,21 +150,19 @@ for input_dir in input_dirs:
             temp_canvas = img_view.copy()
             h, w = temp_canvas.shape[:2]
 
-            # Linhas de guia
-            cv2.line(temp_canvas, (0, mouse_y), (w, mouse_y), (255, 255, 255), 1)
-            cv2.line(temp_canvas, (mouse_x, 0), (mouse_x, h), (255, 255, 255), 1)
+            cv2.line(temp_canvas, (0, mouse_y), (w, mouse_y), (200, 200, 200), 1)
+            cv2.line(temp_canvas, (mouse_x, 0), (mouse_x, h), (200, 200, 200), 1)
 
-            # Retângulo fantasma enquanto arrasta
             if drawing:
                 cv2.rectangle(temp_canvas, (ix, iy), (mouse_x, mouse_y), (0, 255, 255), 1)
 
-            # Legenda
-            status = f"[{current_class}] {CLASSES[current_class]} | 1-6: Classe | s: Salvar | n: Sem classe | c: Limpar | q: Sair"
-            cv2.putText(temp_canvas, status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 0, 0), 2)
+            status = f"[{current_class}] {CLASSES[current_class]} | 1-6: Classe | s: Salvar | n: Pular/Vazio | c: Limpar Último | q: Sair"
+
+            cv2.rectangle(temp_canvas, (5, 5), (750, 40), (0, 0, 0), -1)
+            cv2.putText(temp_canvas, status, (15, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
 
             cv2.imshow("Labeling", temp_canvas)
-
-            key = cv2.waitKey(1) & 0xFF
+            key = cv2.waitKey(20) & 0xFF
 
             if key == ord('s'):
                 save_labels(img_name, bboxes, output_lbl_dir)
@@ -163,9 +174,11 @@ for input_dir in input_dirs:
                 print(f"Imagem {img_name} marcada como fundo (sem classes)")
                 break
             elif key == ord('c'):
+                if len(bboxes) > 0:
+                    bboxes.pop()
                 img_view = crop.copy()
-                bboxes = []
-            elif ord('1') <= key <= ord('5'):
+                redraw_existing_bboxes()
+            elif ord('1') <= key <= ord('6'):
                 current_class = int(chr(key)) - 1
             elif key == ord('q'):
                 cv2.destroyAllWindows()

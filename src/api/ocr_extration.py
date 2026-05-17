@@ -4,13 +4,7 @@ import easyocr
 
 reader = easyocr.Reader(['en', 'pt'], gpu=False)
 
-def verificar_generico_preprocess(img):
 
-    resultado = reader.readtext(img, detail=0, paragraph=True)
-    texto_completo = " ".join(resultado).lower()
-
-    indicadores = ["medicamento genérico", "genérico", "similar"]
-    return any(ind in texto_completo for ind in indicadores)
 
 def process_crops_with_ocr(img, results, reader, model_names):
 
