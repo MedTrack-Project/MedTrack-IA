@@ -18,10 +18,10 @@ def train_model():
         batch=4,
         workers=2,
         device=0,
-        project='runs/detect',     # Onde salvar os logs
-        name='medtrack_yolo_train',      # Nome da pasta do treino atual
+        project='runs/detect',
+        name='medtrack_yolo_train',
         save=True,
-        cache=False                       # Acelera o treino se tiver RAM disponível
+        cache=False
     )
 
     print("✅ Treinamento concluído!")

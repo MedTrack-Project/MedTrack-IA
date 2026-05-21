@@ -5,7 +5,7 @@ import uvicorn
 import numpy as np
 from fastapi import FastAPI, UploadFile, File
 from ultralytics import YOLO
-import easyocr
+from ocr_extration import process_crops_with_easyocr
 
 if torch.cuda.is_available():
     torch.cuda.set_device(0)
@@ -15,16 +15,11 @@ else:
 
 print(f"--- ATENÇÃO: YOLOv8 configurado em: {torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'} ---")
 
-reader = easyocr.Reader(['en', 'pt'], gpu=True)
-
-
 base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.normpath(
-    os.path.join(base_dir, "..", "training", "runs", "detect", "runs", "detect", "medtrack_yolo_train", "weights",
+    os.path.join(base_dir, "..", "training", "runs", "detect", "runs", "detect", "medtrack_yolo_train2", "weights",
                  "best.pt")
 )
-
-
 
 if not os.path.exists(model_path):
     print(f"❌ ERRO: Peso do modelo não encontrado em: {model_path}")
@@ -52,15 +47,15 @@ async def extract_medicine_info(file: UploadFile = File(...)):
 
     results = model.predict(img, conf=0.5, device=device)
 
-
     is_generico = False
     for item in results:
+        if item.boxes is not None and len(item.boxes) > 0:
+            classes_detectadas = item.boxes.cls.cpu().tolist()
+            for cls_idx in classes_detectadas:
+                if model.names[int(cls_idx)] == "generico":
+                    is_generico = True
 
-        classes_detectadas = item.boxes.cls.tolist()
-        for cls_idx in classes_detectadas:
-            if model.names[int(cls_idx)] == "generico":
-                is_generico = True
-                break
+                    break
         if is_generico:
             break
 
@@ -72,28 +67,29 @@ async def extract_medicine_info(file: UploadFile = File(...)):
     }
 
     for item in results:
+        if item.boxes is None:
+            continue
+
         for box in item.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            label_name = model.names[int(box.cls[0])]
+            x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
+            label_name = model.names[int(box.cls[0].cpu().item())]
 
             if label_name == "generico":
                 continue
 
-            if label_name == "nome" and is_generico:
-                data_extracted["data"][label_name] = "Medicamento Genérico"
+            text = process_crops_with_easyocr(img, x1, y1, x2, y2)
+            if text:
+                data_extracted["data"][label_name] = text
                 data_extracted["count"] += 1
-                continue
 
-            roi = img[y1:y2, x1:x2]
-            if roi.size > 0:
-                result_ocr = reader.readtext(roi, detail=0, paragraph=False)
-                text = " ".join(result_ocr).strip()
-
-                if text:
-                    data_extracted["data"][label_name] = text
-                    data_extracted["count"] += 1
+    if is_generico and "nome" in data_extracted["data"]:
+        data_extracted["data"]["nome"] = "Medicamento Genérico"
+    elif is_generico and "nome" not in data_extracted["data"]:
+        data_extracted["data"]["nome"] = "Medicamento Genérico"
+        data_extracted["count"] += 1
 
     if torch.cuda.is_available():
+        torch.cuda.synchronize()
         torch.cuda.empty_cache()
 
     print(data_extracted)

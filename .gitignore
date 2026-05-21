@@ -3,7 +3,10 @@ data/
 *.jpg
 *.jpeg
 *.png
-
+# Exemplo de linhas para adicionar no seu .gitignore
+training/datasets/
+training/runs/
+*.txt
 # --- Python ---
 __pycache__/
 *.py[cod]

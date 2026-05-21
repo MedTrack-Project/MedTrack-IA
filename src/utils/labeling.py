@@ -1,7 +1,5 @@
 import cv2
-from ultralytics import YOLO
 import os
-import re
 
 CLASSES = ["nome", "agente_ativo", "dosagem", "validade", "quantidade", "generico"]
 current_class = 0
@@ -11,58 +9,27 @@ ix, iy = -1, -1
 mouse_x, mouse_y = 0, 0
 img_view = None
 
-model = YOLO('../../models/base/yolov8n.pt')
 
+# 🚀 REMOVIDO: Não precisamos mais carregar o 'yolov8n.pt' padrão aqui!
 
-def detect_crop(img_path):
+def preparar_imagem(img_path):
+    """
+    Apenas carrega a imagem original e garante que ela não vai estourar
+    o tamanho do monitor na hora de fazer o labeling.
+    """
     img = cv2.imread(img_path)
-
     if img is None:
-        print("Erro: Imagem nao encontrada")
+        print(f"❌ Erro: Imagem nao encontrada em {img_path}")
         return None
 
-    h_orig, w_orig, _ = img.shape
-    results = model.predict(img, conf=0.2, verbose=False)  # verbose=False limpa o terminal
-    biggest = 0
-    better_box = None
+    # Reduz imagens gigantes de celular para caber na tela do monitor ao anotar
+    max_display_dim = 900
+    h, w = img.shape[:2]
+    if max(h, w) > max_display_dim:
+        scale = max_display_dim / max(h, w)
+        img = cv2.resize(img, (int(w * scale), int(h * scale)))
 
-    for result in results:
-        boxes = result.boxes
-        for box in boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            area = (y2 - y1) * (x2 - x1)
-            if area > biggest:
-                biggest = area
-                better_box = (x1, y1, x2, y2)
-
-    if better_box:
-        x1, y1, x2, y2 = better_box
-
-        largura_box = x2 - x1
-        altura_box = y2 - y1
-
-        padding_w = int(largura_box)
-        padding_h = int(altura_box * 0.2)
-
-        nx1 = max(0, x1 - padding_w)
-        ny1 = max(0, y1 - padding_h)
-        nx2 = min(w_orig, x2 + padding_w)
-        ny2 = min(h_orig, y2 + padding_h)
-
-        crop_img = img[ny1:ny2, nx1:nx2]
-
-        max_display_dim = 900
-        ch, cw = crop_img.shape[:2]
-        if max(ch, cw) > max_display_dim:
-            scale = max_display_dim / max(ch, cw)
-            crop_img = cv2.resize(crop_img, (int(cw * scale), int(ch * scale)))
-
-        cv2.imwrite('croped_medicine.jpg', crop_img)
-        print("Sucesso! Recorte salvo como 'croped_medicine.jpg'")
-        return crop_img
-
-    print("Erro: Nenhum Objeto detectado pelo YOLO")
-    return None
+    return img
 
 
 def redraw_existing_bboxes():
@@ -117,7 +84,8 @@ def save_labels(img_name, bboxes, output_lbl_dir):
         print(f"❌ Erro ao salvar label: {e}")
 
 
-input_dirs = ['../../data/remedios', '../../data/Astro - 500mg', '../../data/Azitromicina-500mg', '../../data/Enavo ODT - 8 mg', '../../data/Puran T4 - 50mcg']
+# Ajuste os caminhos conforme sua estrutura de pastas
+input_dirs = ['../../data/Astro - 500mg', '../../data/Azitromicina-500mg', '../../data/Puran T4 - 50mcg',  ]
 output_dir = '../../dataset/images/train'
 output_lbl_dir = '../../dataset/labels/train'
 os.makedirs(output_dir, exist_ok=True)
@@ -135,12 +103,14 @@ for input_dir in input_dirs:
             continue
 
         path = os.path.join(input_dir, img_name)
-        crop = detect_crop(path)
 
-        if crop is None:
+        # ⚡ MUDANÇA AQUI: Carrega a imagem sem filtros ou pulos do YOLO
+        foto_remedio = preparar_imagem(path)
+
+        if foto_remedio is None:
             continue
 
-        img_view = crop.copy()
+        img_view = foto_remedio.copy()
         bboxes = []
 
         cv2.namedWindow("Labeling", cv2.WINDOW_NORMAL)
@@ -158,25 +128,25 @@ for input_dir in input_dirs:
 
             status = f"[{current_class}] {CLASSES[current_class]} | 1-6: Classe | s: Salvar | n: Pular/Vazio | c: Limpar Último | q: Sair"
 
-            cv2.rectangle(temp_canvas, (5, 5), (750, 40), (0, 0, 0), -1)
-            cv2.putText(temp_canvas, status, (15, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+            cv2.rectangle(temp_canvas, (5, 5), (850, 40), (0, 0, 0), -1)
+            cv2.putText(temp_canvas, status, (15, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 255, 255), 1)
 
             cv2.imshow("Labeling", temp_canvas)
             key = cv2.waitKey(20) & 0xFF
 
             if key == ord('s'):
                 save_labels(img_name, bboxes, output_lbl_dir)
-                cv2.imwrite(os.path.join(output_dir, img_name), crop)
+                cv2.imwrite(os.path.join(output_dir, img_name), foto_remedio)
                 break
             elif key == ord('n'):
                 save_labels(img_name, [], output_lbl_dir)
-                cv2.imwrite(os.path.join(output_dir, img_name), crop)
+                cv2.imwrite(os.path.join(output_dir, img_name), foto_remedio)
                 print(f"Imagem {img_name} marcada como fundo (sem classes)")
                 break
             elif key == ord('c'):
                 if len(bboxes) > 0:
                     bboxes.pop()
-                img_view = crop.copy()
+                img_view = foto_remedio.copy()
                 redraw_existing_bboxes()
             elif ord('1') <= key <= ord('6'):
                 current_class = int(chr(key)) - 1
