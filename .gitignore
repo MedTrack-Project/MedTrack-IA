@@ -1,46 +1,68 @@
-data/
-# Ignorar todas as imagens JPG e JPEG
-*.jpg
-*.jpeg
-*.png
-# Exemplo de linhas para adicionar no seu .gitignore
-training/datasets/
-training/runs/
-*.txt
 # --- Python ---
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
-.env
+.Python
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# --- Modelos e Pesos (Arquivos Pesados) ---
+# --- Ambientes virtuais ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Variaveis de ambiente ---
+.env
+.env.*
+!.env.example
+
+# --- IDEs e editores ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Sistema operacional ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs e temporarios ---
+*.log
+*.tmp
+*.temp
+
+# --- Modelos e pesos ---
 *.pt
 *.onnx
 *.engine
-# Se quiser manter apenas o seu melhor modelo no Git,
-# você pode ignorar todos e abrir uma exceção, mas o ideal é
-# não subir arquivos binários grandes.
+*.pth
+*.ckpt
+models/
 
-# --- YOLO e Treinamento ---
+# --- YOLO e treinamento ---
 runs/
+training/runs/
+training/datasets/
 *.cache
-# Ignora as pastas de resultados de treino que o YOLO cria automaticamente
-# (Você deve subir apenas as fotos de métricas manualmente se desejar)
 
-# --- Dataset (Opcional, mas recomendado) ---
-# Geralmente não subimos o dataset inteiro (imagens) para o Git
-# por causa do limite de espaço e performance.
+# --- Dados e imagens ---
+data/
 dataset/images/
 dataset/labels/*.cache
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.webp
 
-# --- Arquivos Temporários do Sistema/IDE ---
-.vscode/
-.idea/
-*.log
-.DS_Store
-Thumbs.db
-
-# --- Arquivos de Debug que criamos ---
+# --- Arquivos de debug locais ---
 croped_medicine.jpg
 debug_deteccao.jpg
