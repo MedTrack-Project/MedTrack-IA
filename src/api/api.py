@@ -77,7 +77,7 @@ async def extract_medicine_info(file: UploadFile = File(...)):
             if label_name == "generico":
                 continue
 
-            text = process_crops_with_easyocr(img, x1, y1, x2, y2)
+            text = process_crops_with_easyocr(img, x1, y1, x2, y2, label_name)
             if text:
                 data_extracted["data"][label_name] = text
                 data_extracted["count"] += 1
