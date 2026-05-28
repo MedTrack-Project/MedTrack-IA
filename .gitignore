@@ -5,6 +5,7 @@ data/
 training/datasets/
 training/runs/
 *.txt
+tests/test_artifacts/
 
 # --- Python ---
 __pycache__/

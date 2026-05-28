@@ -3,7 +3,7 @@ import cv2
 import torch
 import uvicorn
 import numpy as np
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from ultralytics import YOLO
 from ocr_extration import process_crops_with_easyocr
 
@@ -35,6 +35,11 @@ async def extract_medicine_info(file: UploadFile = File(...)):
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="Não foi possível decodificar a imagem."
+        )
 
     if img is None:
         return {"status": "error", "message": "Não foi possível decodificar a imagem."}

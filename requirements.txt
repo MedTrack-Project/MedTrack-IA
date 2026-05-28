@@ -12,3 +12,7 @@ numpy==1.26.4             # Base matemática para imagens
 # Utilitários
 python-dotenv             # Para gerenciar variáveis de ambiente
 pydantic==2.6.3           # Validação de dados JSON
+
+# Testes
+pytest
+httpx
