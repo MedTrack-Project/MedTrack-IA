@@ -6,6 +6,7 @@ training/datasets/
 training/runs/
 *.txt
 tests/test_artifacts/
+*.pdf
 
 # --- Python ---
 __pycache__/
