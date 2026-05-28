@@ -7,8 +7,9 @@ training/runs/
 *.txt
 tests/test_artifacts/
 *.pdf
+tests/test_artifacts
 
-# --- Python ---
+# --- Pyt_artihon ---
 __pycache__/
 *.py[cod]
 *$py.class

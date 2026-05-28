@@ -1,11 +1,14 @@
 import os
 import cv2
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import torch
 import uvicorn
 import numpy as np
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from ultralytics import YOLO
 from ocr_extration import process_crops_with_easyocr
+
 
 if torch.cuda.is_available():
     torch.cuda.set_device(0)
