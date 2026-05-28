@@ -1,9 +1,7 @@
 import cv2
 import easyocr
-# Importa o sanitizador da nossa nova pasta utilitária
 from utils.text_processor import sanitizar_texto
 
-# Inicializa o leitor compartilhando a GPU
 reader = easyocr.Reader(['en', 'pt'], gpu=True)
 
 
