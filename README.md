@@ -136,7 +136,17 @@ ngrok http 8000
   }
 }
 ```
+## 📊 Governança de Dados e Dataset (YOLOv8)
 
+Para cumprir os requisitos de reprodutibilidade científica e técnica do modelo, o dataset completo utilizado para o treinamento do `best.pt` foi estruturado e disponibilizado externamente (evitando inflar o tamanho do repositório Git).
+
+* 🔗 **Link de Acesso ao Dataset Estruturado (.zip):** [Link_do_Google_Drive](https://drive.google.com/file/d/1kFx1Vbpx1E5vtfPsAJBaApEtnxy1iSfs/view?usp=sharing)
+
+### 🧬 Estrutura do Arquivo Disponibilizado
+O arquivo compactado segue rigorosamente a arquitetura de diretórios do ecossistema Ultralytics, emparelhando cada imagem ao seu respectivo arquivo de anotação bounding-box (`.txt`):
+* `/train/images/` e `/train/labels/` (Conjunto de treino)
+* `/val/images/` e `/val/labels/` (Conjunto de validação e métricas de acurácia)
+* `campos.yaml` (Mapeamento de caminhos relativos e indexação das classes de fármacos)
 ---
 
 ## ⚠️ Aviso de Uso Responsável
@@ -150,6 +160,7 @@ Este sistema **NÃO substitui**, em nenhuma hipótese:
 Qualquer utilização em cenários reais deve contar com **dupla checagem humana** para garantir a segurança na administração de medicamentos.
 
 ---
+
 
 ## 📄 Licença
 
