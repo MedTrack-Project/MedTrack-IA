@@ -1,8 +1,8 @@
-import cv2
 import easyocr
+
 from utils.text_processor import sanitizar_texto
 
-reader = easyocr.Reader(['en', 'pt'], gpu=True)
+reader = easyocr.Reader(["en", "pt"], gpu=True)
 
 
 def process_crops_with_easyocr(img, x1, y1, x2, y2, label_name):
