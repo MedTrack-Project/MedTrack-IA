@@ -1,6 +1,10 @@
 from pathlib import Path
 
+import pytest
+
 from medtrack_ai.model_registry.manifest import load_manifest, sha256_file, verify_checksum
+
+pytestmark = pytest.mark.unit
 
 
 def test_manifesto_atual_e_valido() -> None:

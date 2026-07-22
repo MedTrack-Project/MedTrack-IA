@@ -1,9 +1,3 @@
-"""Contrato de configuração por ambiente do MedTrack IA.
-
-O módulo é introduzido nesta fase, mas a API legada será conectada a ele apenas
-na Fase 2, durante a separação entre HTTP e inferência.
-"""
-
 from functools import lru_cache
 from pathlib import Path
 
@@ -20,7 +14,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    environment: str = Field(default="local", alias="ENV")
+    environment: str = Field(default="local", validation_alias="MEDTRACK_ENV")
     log_level: str = "INFO"
     model_uri: str = "models/medtrack-yolo/v1.0.0/best.pt"
     model_version: str = "v1.0.0"

@@ -16,6 +16,7 @@ venv/
 .venv/
 .uv-check/
 .env
+.coverage
 
 # --- Modelos e Pesos (Arquivos Pesados) ---
 *.pt

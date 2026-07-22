@@ -1,8 +1,9 @@
 """Testes de contrato da API sem dependência de pesos, GPU ou OCR real."""
 
-import base64
 from collections.abc import Iterator
 
+import cv2
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -11,10 +12,7 @@ from medtrack_ai.domain.models import DetectionResult, ExtractedMedicineData
 from medtrack_ai.inference.service import ModelLoadError
 from medtrack_ai.settings import Settings
 
-JPEG_1X1 = base64.b64decode(
-    "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////"
-    "2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAH/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oACAEBAAEFAqf/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oACAEDAQE/Aaf/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oACAECAQE/Aaf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oACAEBAAY/Ap//xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oACAEBAAE/Iaf/2gAMAwEAAgADAAAAEP/EABQRAQAAAAAAAAAAAAAAAAAAABD/2gAIAQMBAT8QH//EABQRAQAAAAAAAAAAAAAAAAAAABD/2gAIAQIBAT8QH//EABQQAQAAAAAAAAAAAAAAAAAAABD/2gAIAQEAAT8QH//Z"
-)
+pytestmark = pytest.mark.integration
 
 
 class FakeInferenceService:
@@ -43,7 +41,13 @@ def client() -> Iterator[TestClient]:
 
 
 def test_detect_preserva_contrato_de_sucesso(client: TestClient) -> None:
-    response = client.post("/detect", files={"file": ("medicamento.jpg", JPEG_1X1, "image/jpeg")})
+    encoded, image = cv2.imencode(".png", np.zeros((1, 1, 3), dtype=np.uint8))
+    assert encoded
+
+    response = client.post(
+        "/detect",
+        files={"file": ("medicamento.png", image.tobytes(), "image/png")},
+    )
 
     assert response.status_code == 200
     assert response.json() == {
