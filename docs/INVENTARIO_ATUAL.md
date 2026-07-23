@@ -10,7 +10,7 @@ Data do levantamento: 22 de julho de 2026.
 | OCR | `src/api/ocr_extration.py` | Inicializa o EasyOCR no momento da importação e depende de GPU fixa. |
 | Treinamento | `src/training/train.py` | Executa fine-tuning YOLO e grava resultados em `runs/detect`. |
 | Utilitários | `src/utils/` | Sanitização de texto e ferramenta de rotulagem. |
-| Dados | `dataset/` e fonte externa indicada no README | Há anotações de validação versionadas; imagens e pesos são ignorados. |
+| Dados | `dataset/` e fonte externa indicada no README | Dataset e pesos são locais e ignorados; apenas a configuração de treino é versionada. |
 | Contêiner | `Dockerfile` | Instala `requirements.txt` e inicia `src.api.api:app`, mas não recebe o modelo. |
 | Testes | `tests/test_api.py` | Mistura teste HTTP e modelo real; cria artefato local; alguns casos são ignorados quando não há imagem. |
 

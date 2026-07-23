@@ -8,7 +8,7 @@ def train_model():
     device = "0" if torch.cuda.is_available() else "cpu"
     print(f"🚀 Iniciando treinamento no dispositivo: {device}")
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(base_dir, "..", "..", "config", "campos.yaml")
+    config_path = os.path.join(base_dir, "..", "..", "config", "training", "dataset.yaml")
     config_path = os.path.normpath(config_path)
 
     model = YOLO("yolov8n.pt")
