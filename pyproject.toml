@@ -13,7 +13,7 @@ authors = [{ name = "MedTrack" }]
 dependencies = [
   "fastapi==0.110.0",
   "numpy==1.26.4",
-  "opencv-python-headless>=4.9,<5",
+  "opencv-python-headless>=4.9,<6",
   "pydantic-settings>=2.2,<3",
   "python-multipart==0.0.9",
   "uvicorn==0.27.1",
