@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 
 CLASSES = ["nome", "agente_ativo", "dosagem", "validade", "quantidade", "generico"]
 current_class = 0
@@ -11,6 +12,7 @@ img_view = None
 
 
 # 🚀 REMOVIDO: Não precisamos mais carregar o 'yolov8n.pt' padrão aqui!
+
 
 def preparar_imagem(img_path):
     """
@@ -42,8 +44,9 @@ def redraw_existing_bboxes():
         x2 = int((cx + bw / 2) * w)
         y2 = int((cy + bh / 2) * h)
         cv2.rectangle(img_view, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(img_view, CLASSES[cls_idx], (x1, y1 - 5),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        cv2.putText(
+            img_view, CLASSES[cls_idx], (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1
+        )
 
 
 def draw_bbox(event, x, y, flags, param):
@@ -69,8 +72,15 @@ def draw_bbox(event, x, y, flags, param):
             bboxes.append((current_class, cx, cy, bw, bh))
 
             cv2.rectangle(img_view, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-            cv2.putText(img_view, CLASSES[current_class], (x_min, y_min - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(
+                img_view,
+                CLASSES[current_class],
+                (x_min, y_min - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                1,
+            )
 
 
 def save_labels(img_name, bboxes, output_lbl_dir):
@@ -85,9 +95,13 @@ def save_labels(img_name, bboxes, output_lbl_dir):
 
 
 # Ajuste os caminhos conforme sua estrutura de pastas
-input_dirs = ['../../data/Astro - 500mg', '../../data/Azitromicina-500mg', '../../data/Puran T4 - 50mcg',  ]
-output_dir = '../../dataset/images/train'
-output_lbl_dir = '../../dataset/labels/train'
+input_dirs = [
+    "../../data/Astro - 500mg",
+    "../../data/Azitromicina-500mg",
+    "../../data/Puran T4 - 50mcg",
+]
+output_dir = "../../dataset/images/train"
+output_lbl_dir = "../../dataset/labels/train"
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(output_lbl_dir, exist_ok=True)
 
@@ -99,7 +113,7 @@ for input_dir in input_dirs:
     print(f"\n📂 Processando: {input_dir}")
 
     for img_name in os.listdir(input_dir):
-        if not img_name.lower().endswith(('.jpg', '.jpeg', '.png')):
+        if not img_name.lower().endswith((".jpg", ".jpeg", ".png")):
             continue
 
         path = os.path.join(input_dir, img_name)
@@ -126,31 +140,36 @@ for input_dir in input_dirs:
             if drawing:
                 cv2.rectangle(temp_canvas, (ix, iy), (mouse_x, mouse_y), (0, 255, 255), 1)
 
-            status = f"[{current_class}] {CLASSES[current_class]} | 1-6: Classe | s: Salvar | n: Pular/Vazio | c: Limpar Último | q: Sair"
+            status = (
+                f"[{current_class}] {CLASSES[current_class]} | 1-6: Classe | s: Salvar | "
+                "n: Pular/Vazio | c: Limpar Último | q: Sair"
+            )
 
             cv2.rectangle(temp_canvas, (5, 5), (850, 40), (0, 0, 0), -1)
-            cv2.putText(temp_canvas, status, (15, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 255, 255), 1)
+            cv2.putText(
+                temp_canvas, status, (15, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 255, 255), 1
+            )
 
             cv2.imshow("Labeling", temp_canvas)
             key = cv2.waitKey(20) & 0xFF
 
-            if key == ord('s'):
+            if key == ord("s"):
                 save_labels(img_name, bboxes, output_lbl_dir)
                 cv2.imwrite(os.path.join(output_dir, img_name), foto_remedio)
                 break
-            elif key == ord('n'):
+            elif key == ord("n"):
                 save_labels(img_name, [], output_lbl_dir)
                 cv2.imwrite(os.path.join(output_dir, img_name), foto_remedio)
                 print(f"Imagem {img_name} marcada como fundo (sem classes)")
                 break
-            elif key == ord('c'):
+            elif key == ord("c"):
                 if len(bboxes) > 0:
                     bboxes.pop()
                 img_view = foto_remedio.copy()
                 redraw_existing_bboxes()
-            elif ord('1') <= key <= ord('6'):
+            elif ord("1") <= key <= ord("6"):
                 current_class = int(chr(key)) - 1
-            elif key == ord('q'):
+            elif key == ord("q"):
                 cv2.destroyAllWindows()
                 exit()
 

@@ -1,0 +1,41 @@
+name: Model Artifact Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: Manifesto do modelo a verificar
+        required: true
+        default: config/models/medtrack-yolo-v1.0.0.json
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify-artifact:
+    name: Download and verify model artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.30"
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install test environment
+        run: uv sync --frozen --group dev
+
+      - name: Download model from immutable release
+        run: uv run --no-sync python scripts/fetch_model.py --manifest "${{ inputs.manifest }}"
+
+      - name: Verify local artifact checksum
+        env:
+          MEDTRACK_RUN_MODEL_SMOKE: "1"
+        run: uv run --no-sync pytest -m model

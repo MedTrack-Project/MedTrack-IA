@@ -1,15 +1,17 @@
-from ultralytics import YOLO
-import torch
 import os
 
+import torch
+from ultralytics import YOLO
+
+
 def train_model():
-    device = '0' if torch.cuda.is_available() else 'cpu'
+    device = "0" if torch.cuda.is_available() else "cpu"
     print(f"🚀 Iniciando treinamento no dispositivo: {device}")
     base_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(base_dir, "..", "..", "config", "campos.yaml")
     config_path = os.path.normpath(config_path)
 
-    model = YOLO('yolov8n.pt')
+    model = YOLO("yolov8n.pt")
 
     results = model.train(
         data=config_path,
@@ -18,14 +20,15 @@ def train_model():
         batch=4,
         workers=2,
         device=0,
-        project='runs/detect',
-        name='medtrack_yolo_train',
+        project="runs/detect",
+        name="medtrack_yolo_train",
         save=True,
-        cache=False
+        cache=False,
     )
 
     print("✅ Treinamento concluído!")
     print(f"🏆 Melhor modelo salvo em: {results.save_dir}/weights/best.pt")
+
 
 if __name__ == "__main__":
     train_model()

@@ -1,0 +1,66 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test, lint and types
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.30"
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Verify locked dependencies
+        run: uv lock --check
+
+      - name: Install development environment
+        run: uv sync --frozen --group dev
+
+      - name: Lint
+        run: uv run --no-sync ruff check src tests scripts
+
+      - name: Type check
+        run: uv run --no-sync pyright src/medtrack_ai tests scripts
+
+      - name: Test
+        run: uv run --no-sync pytest
+
+  container:
+    name: Build container
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image without publishing
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: medtrack-ai:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

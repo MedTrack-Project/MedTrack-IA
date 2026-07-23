@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: medtrack-ai:local
+    ports:
+      - "${MEDTRACK_PORT:-8000}:8000"
+    environment:
+      MEDTRACK_ENV: ${MEDTRACK_ENV:-local}
+      MEDTRACK_LOG_LEVEL: ${MEDTRACK_LOG_LEVEL:-INFO}
+      MEDTRACK_MODEL_URI: /app/models/medtrack-yolo/v1.0.0/best.pt
+      MEDTRACK_MODEL_VERSION: ${MEDTRACK_MODEL_VERSION:-v1.0.0}
+      MEDTRACK_FETCH_MODEL_ON_START: "false"
+      MEDTRACK_DEVICE: ${MEDTRACK_DEVICE:-cpu}
+      MEDTRACK_MAX_IMAGE_DIMENSION: ${MEDTRACK_MAX_IMAGE_DIMENSION:-1024}
+      MEDTRACK_YOLO_CONFIDENCE: ${MEDTRACK_YOLO_CONFIDENCE:-0.5}
+      EASYOCR_MODULE_PATH: /home/app/.EasyOCR
+    volumes:
+      - ./models:/app/models:ro
+    init: true

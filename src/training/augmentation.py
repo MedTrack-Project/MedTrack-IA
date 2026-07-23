@@ -1,13 +1,13 @@
-import cv2
-import numpy as np
 import os
 import random
 
+import cv2
+import numpy as np
 
-INPUT_IMG_DIR = '../../dataset/images/train'
-INPUT_LBL_DIR = '../../dataset/labels/train'
-OUTPUT_IMG_DIR = '../../dataset/images/train'
-OUTPUT_LBL_DIR = '../../dataset/labels/train'
+INPUT_IMG_DIR = "../../dataset/images/train"
+INPUT_LBL_DIR = "../../dataset/labels/train"
+OUTPUT_IMG_DIR = "../../dataset/images/train"
+OUTPUT_LBL_DIR = "../../dataset/labels/train"
 
 AUGMENTATIONS_PER_IMAGE = 5
 
@@ -15,10 +15,9 @@ os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
 os.makedirs(OUTPUT_LBL_DIR, exist_ok=True)
 
 
-
 def ajustar_brilho_contraste(img):
-    alpha = random.uniform(0.6, 1.4)   # contraste
-    beta = random.randint(-40, 40)     # brilho
+    alpha = random.uniform(0.6, 1.4)  # contraste
+    beta = random.randint(-40, 40)  # brilho
     return cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
 
 
@@ -90,22 +89,28 @@ def simular_sombra(img):
     return np.clip(img_sombra, 0, 255).astype(np.uint8)
 
 
-
 def carregar_labels(label_path):
     labels = []
     if not os.path.exists(label_path):
         return labels
-    with open(label_path, 'r') as f:
+    with open(label_path) as f:
         for line in f:
             parts = line.strip().split()
             if len(parts) == 5:
-                labels.append((int(parts[0]), float(parts[1]), float(parts[2]),
-                                float(parts[3]), float(parts[4])))
+                labels.append(
+                    (
+                        int(parts[0]),
+                        float(parts[1]),
+                        float(parts[2]),
+                        float(parts[3]),
+                        float(parts[4]),
+                    )
+                )
     return labels
 
 
 def salvar_labels(label_path, labels):
-    with open(label_path, 'w') as f:
+    with open(label_path, "w") as f:
         for label in labels:
             f.write(f"{label[0]} {label[1]:.6f} {label[2]:.6f} {label[3]:.6f} {label[4]:.6f}\n")
 
@@ -131,10 +136,11 @@ def aplicar_augmentation(img, labels):
     return img, labels
 
 
-
-imagens = [f for f in os.listdir(INPUT_IMG_DIR)
-           if f.lower().endswith(('.jpg', '.jpeg', '.png'))
-           and '_aug' not in f]
+imagens = [
+    f
+    for f in os.listdir(INPUT_IMG_DIR)
+    if f.lower().endswith((".jpg", ".jpeg", ".png")) and "_aug" not in f
+]
 
 print(f"\n🔍 {len(imagens)} imagens originais encontradas.")
 print(f"📦 Gerando {AUGMENTATIONS_PER_IMAGE} versões por imagem...")
@@ -144,7 +150,7 @@ total_geradas = 0
 
 for img_name in imagens:
     img_path = os.path.join(INPUT_IMG_DIR, img_name)
-    label_path = os.path.join(INPUT_LBL_DIR, os.path.splitext(img_name)[0] + '.txt')
+    label_path = os.path.join(INPUT_LBL_DIR, os.path.splitext(img_name)[0] + ".txt")
 
     img = cv2.imread(img_path)
     if img is None:
@@ -159,8 +165,8 @@ for img_name in imagens:
     for i in range(AUGMENTATIONS_PER_IMAGE):
         img_aug, labels_aug = aplicar_augmentation(img.copy(), labels.copy())
 
-        novo_nome = f"{nome_base}_aug{i+1}{ext}"
-        novo_label = f"{nome_base}_aug{i+1}.txt"
+        novo_nome = f"{nome_base}_aug{i + 1}{ext}"
+        novo_label = f"{nome_base}_aug{i + 1}.txt"
 
         cv2.imwrite(os.path.join(OUTPUT_IMG_DIR, novo_nome), img_aug)
         salvar_labels(os.path.join(OUTPUT_LBL_DIR, novo_label), labels_aug)

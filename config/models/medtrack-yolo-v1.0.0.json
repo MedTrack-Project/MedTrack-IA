@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "artifact_version": "v1.0.0",
+  "filename": "best.pt",
+  "download_url": "https://github.com/MedTrack-Project/MedTrack-IA/releases/download/v1.0.0/best.pt",
+  "sha256": "4a6a0d6b28fa8588f85c2f2b6ef739988a01ecfe66f8e44ce830492ccc59eaec",
+  "local_path": "models/medtrack-yolo/v1.0.0/best.pt",
+  "training": {
+    "code_revision": "not-recorded",
+    "dataset_version": "not-recorded",
+    "metrics": "not-recorded"
+  },
+  "classes": [
+    "nome",
+    "agente_ativo",
+    "dosagem",
+    "validade",
+    "quantidade",
+    "generico"
+  ]
+}

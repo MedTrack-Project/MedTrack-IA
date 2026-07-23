@@ -1,103 +1,95 @@
-import os
+"""Testes de contrato da API sem dependência de pesos, GPU ou OCR real."""
+
+from collections.abc import Iterator
+
+import cv2
+import numpy as np
 import pytest
-import torch
 from fastapi.testclient import TestClient
 
-import sys
+from medtrack_ai.api.main import create_app
+from medtrack_ai.domain.models import DetectionResult, ExtractedMedicineData
+from medtrack_ai.inference.service import ModelLoadError
+from medtrack_ai.settings import Settings
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/api')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-
-from api import app
-
-client = TestClient(app)
-
-ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "test_artifacts")
-IMAGEM_VALIDA = os.path.join(ARTIFACTS_DIR, "remedio_valido.jpg")
-IMAGEM_GENERICO = os.path.join(ARTIFACTS_DIR, "remedio_generico.jpg")
-ARQUIVO_INVALIDO = os.path.join(ARTIFACTS_DIR, "documento_invalido.pdf")
+pytestmark = pytest.mark.integration
 
 
-@pytest.fixture(autouse=True)
-def run_around_tests():
-    """
-    Fixture executada automaticamente antes e depois de CADA teste.
-    Garante o Critério: Mapeamento de VRAM (Limpeza de Cache do PyTorch).
-    """
-    yield
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+class FakeInferenceService:
+    model_version = "model-v1.0.0"
+
+    def detect(self, image: object) -> DetectionResult:
+        return DetectionResult(
+            is_generico=True,
+            data=ExtractedMedicineData(nome="Medicamento Genérico", dosagem="500mg"),
+        )
 
 
-def test_payload_valido():
-    """
-    Critério: Teste de Payload Válido.
-    Envia uma imagem real e valida se o JSON retorna 200, status de sucesso
-    e os campos esperados da estrutura de dados do MedTrack.
-    """
-    if not os.path.exists(IMAGEM_VALIDA):
-        pytest.skip("Imagem 'remedio_valido.jpg' não encontrada na pasta test_artifacts.")
-
-    with open(IMAGEM_VALIDA, "rb") as img:
-        response = client.post("/detect", files={"file": ("remedio.jpg", img, "image/jpeg")})
-
-    assert response.status_code == 200
-    json_data = response.json()
-
-    assert json_data["status"] == "success"
-    assert "is_generico" in json_data
-    assert "data" in json_data
-    assert "count" in json_data
-    assert isinstance(json_data["is_generico"], bool)
+def fake_factory(_: Settings) -> FakeInferenceService:
+    return FakeInferenceService()
 
 
-def test_regra_medicamento_generico():
-    """
-    Critério: Teste da Regra de Genérico.
-    Valida se, ao interceptar uma imagem com tarja amarela de genérico,
-    a API força o campo 'nome' para 'Medicamento Genérico'.
-    """
-    if not os.path.exists(IMAGEM_GENERICO):
-        pytest.skip("Imagem 'remedio_generico.jpg' não encontrada na pasta test_artifacts.")
+def unavailable_factory(_: Settings) -> FakeInferenceService:
+    raise ModelLoadError("Peso do modelo não encontrado.")
 
-    with open(IMAGEM_GENERICO, "rb") as img:
-        response = client.post("/detect", files={"file": ("generico.jpg", img, "image/jpeg")})
+
+@pytest.fixture
+def client() -> Iterator[TestClient]:
+    app = create_app(settings=Settings(), inference_factory=fake_factory)
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+def test_detect_preserva_contrato_de_sucesso(client: TestClient) -> None:
+    encoded, image = cv2.imencode(".png", np.zeros((1, 1, 3), dtype=np.uint8))
+    assert encoded
+
+    response = client.post(
+        "/detect",
+        files={"file": ("medicamento.png", image.tobytes(), "image/png")},
+    )
 
     assert response.status_code == 200
-    json_data = response.json()
-
-    if json_data["is_generico"] == True:
-        assert json_data["data"]["nome"] == "Medicamento Genérico"
-
-
-def test_resiliencia_arquivo_invalido():
-    """
-    Critério: Teste de Resiliência/Erro.
-    Garante que o envio de formatos não suportados (ex: PDF) retorne o erro tratado
-    com a mensagem esperada e não cause um travamento geral (Crash/Erro 500) no servidor.
-    """
-    if not os.path.exists(ARQUIVO_INVALIDO):
-        os.makedirs(ARTIFACTS_DIR, exist_ok=True)
-        with open(ARQUIVO_INVALIDO, "w") as f:
-            f.write("%PDF-1.5 fake pdf content")
-
-    with open(ARQUIVO_INVALIDO, "rb") as f:
-        response = client.post("/detect", files={"file": ("documento.pdf", f, "application/pdf")})
-
-    assert response.status_code == 400 or response.status_code == 422
-    json_data = response.json()
-    assert "Não foi possível decodificar a imagem." in json_data["detail"]
+    assert response.json() == {
+        "status": "success",
+        "is_generico": True,
+        "data": {"nome": "Medicamento Genérico", "dosagem": "500mg"},
+        "count": 2,
+    }
 
 
-def test_resiliencia_multiplos_disparos_vram():
-    """
-    Critério extra de estresse: Executa 5 requisições seguidas para simular
-    uso volumoso e monitorar se o consumo de VRAM da GTX 1650 permanece estável.
-    """
-    if not os.path.exists(IMAGEM_VALIDA):
-        pytest.skip("Imagem 'remedio_valido.jpg' não encontrada.")
+def test_detect_rejeita_tipo_de_arquivo_invalido(client: TestClient) -> None:
+    response = client.post("/detect", files={"file": ("arquivo.pdf", b"%PDF", "application/pdf")})
 
-    for _ in range(5):
-        with open(IMAGEM_VALIDA, "rb") as img:
-            response = client.post("/detect", files={"file": ("remedio.jpg", img, "image/jpeg")})
-        assert response.status_code == 200
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Não foi possível decodificar a imagem."
+
+
+def test_detect_preserva_erro_de_imagem_ilegivel(client: TestClient) -> None:
+    response = client.post("/detect", files={"file": ("corrompida.jpg", b"invalido", "image/jpeg")})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "error",
+        "message": "Não foi possível decodificar a imagem.",
+    }
+
+
+def test_health_e_readiness(client: TestClient) -> None:
+    assert client.get("/healthz").json() == {"status": "ok"}
+    assert client.get("/readyz").json() == {"status": "ready", "model_version": "model-v1.0.0"}
+
+
+def test_api_retorna_request_id(client: TestClient) -> None:
+    response = client.get("/healthz", headers={"X-Request-ID": "test-request-123"})
+
+    assert response.headers["X-Request-ID"] == "test-request-123"
+
+
+def test_readiness_indica_modelo_ausente() -> None:
+    app = create_app(settings=Settings(), inference_factory=unavailable_factory)
+    with TestClient(app) as client:
+        response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert response.json() == {"status": "not_ready", "reason": "Peso do modelo não encontrado."}

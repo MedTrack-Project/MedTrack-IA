@@ -4,7 +4,6 @@ data/
 *.png
 training/datasets/
 training/runs/
-*.txt
 tests/test_artifacts/
 *.pdf
 tests/test_artifacts
@@ -15,12 +14,15 @@ __pycache__/
 *$py.class
 venv/
 .venv/
+.uv-check/
 .env
+.coverage
 
 # --- Modelos e Pesos (Arquivos Pesados) ---
 *.pt
 *.onnx
 *.engine
+*.part
 
 # --- YOLO e Treinamento ---
 runs/
