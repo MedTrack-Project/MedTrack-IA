@@ -13,6 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
         ca-certificates \
+        gosu \
         libgl1 \
         libglib2.0-0 \
         libgomp1 \
@@ -30,13 +31,20 @@ RUN uv sync --frozen --no-dev --group inference --no-install-project
 
 COPY --chown=app:app src ./src
 COPY --chown=app:app config ./config
+COPY --chown=app:app scripts ./scripts
 RUN uv sync --frozen --no-dev --group inference
 
-USER app
+COPY docker/entrypoint.sh /usr/local/bin/medtrack-entrypoint
+RUN chmod 755 /usr/local/bin/medtrack-entrypoint
+
+ENV MEDTRACK_FETCH_MODEL_ON_START=false \
+    MEDTRACK_MODEL_MANIFEST=config/models/medtrack-yolo-v1.0.0.json \
+    EASYOCR_MODULE_PATH=/home/app/.EasyOCR
 
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
     CMD python -c "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/healthz', timeout=3)"
 
-CMD ["uvicorn", "medtrack_ai.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/usr/local/bin/medtrack-entrypoint"]
+CMD ["sh", "-c", "uvicorn medtrack_ai.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

@@ -48,3 +48,5 @@ use `$PWD.Path` para fornecer o caminho absoluto.
   a plataforma identifique indisponibilidade sem confundir com falha de processo.
 - O Compose é CPU. Uma variante GPU só será criada após a escolha da plataforma
   de deploy e do runtime NVIDIA.
+
+Para deploy de staging na Railway, consulte [RAILWAY.md](RAILWAY.md).

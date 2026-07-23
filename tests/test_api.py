@@ -80,6 +80,12 @@ def test_health_e_readiness(client: TestClient) -> None:
     assert client.get("/readyz").json() == {"status": "ready", "model_version": "model-v1.0.0"}
 
 
+def test_api_retorna_request_id(client: TestClient) -> None:
+    response = client.get("/healthz", headers={"X-Request-ID": "test-request-123"})
+
+    assert response.headers["X-Request-ID"] == "test-request-123"
+
+
 def test_readiness_indica_modelo_ausente() -> None:
     app = create_app(settings=Settings(), inference_factory=unavailable_factory)
     with TestClient(app) as client:

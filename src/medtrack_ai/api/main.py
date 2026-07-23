@@ -2,15 +2,19 @@
 
 from collections.abc import Callable
 from contextlib import asynccontextmanager
+from time import perf_counter
+from uuid import uuid4
 
 import cv2
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from medtrack_ai.api.schemas import DecodeErrorResponse, DetectResponse, ReadinessResponse
 from medtrack_ai.inference.service import InferenceService, ModelLoadError
 from medtrack_ai.inference.yolo_ocr import YoloOcrInferenceService
+from medtrack_ai.observability import configure_logging
 from medtrack_ai.settings import Settings, get_settings
 
 InferenceFactory = Callable[[Settings], InferenceService]
@@ -32,6 +36,7 @@ def create_app(
 ) -> FastAPI:
     """Cria uma aplicação testável, sem carregar IA durante a importação."""
     resolved_settings = settings or get_settings()
+    logger = configure_logging(resolved_settings.log_level)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -49,6 +54,51 @@ def create_app(
         version="1.0.0",
         lifespan=lifespan,
     )
+
+    cors_origins = [
+        origin.strip() for origin in resolved_settings.cors_origins.split(",") if origin.strip()
+    ]
+    if cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=cors_origins,
+            allow_credentials=False,
+            allow_methods=["POST", "GET"],
+            allow_headers=["Content-Type", "X-Request-ID"],
+        )
+
+    @app.middleware("http")
+    async def log_request(request: Request, call_next):
+        request_id = request.headers.get("X-Request-ID", str(uuid4()))
+        started_at = perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            logger.exception(
+                "request.failed",
+                extra={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "request_id": request_id,
+                    "duration_ms": round((perf_counter() - started_at) * 1000, 2),
+                },
+            )
+            raise
+
+        duration_ms = round((perf_counter() - started_at) * 1000, 2)
+        response.headers["X-Request-ID"] = request_id
+        logger.info(
+            "request.completed",
+            extra={
+                "method": request.method,
+                "path": request.url.path,
+                "request_id": request_id,
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+                "model_version": getattr(request.app.state.inference, "model_version", None),
+            },
+        )
+        return response
 
     @app.get("/healthz")
     async def health() -> dict[str, str]:
