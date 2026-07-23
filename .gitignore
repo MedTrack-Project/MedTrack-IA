@@ -29,8 +29,7 @@ runs/
 *.cache
 
 # --- Dataset ---
-dataset/images/
-dataset/labels/*.cache
+dataset/
 
 # --- Arquivos Temporários do Sistema/IDE ---
 .vscode/

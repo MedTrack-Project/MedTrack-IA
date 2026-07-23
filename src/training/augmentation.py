@@ -173,6 +173,3 @@ for img_name in imagens:
         total_geradas += 1
 
     print(f"✅ {img_name} → {AUGMENTATIONS_PER_IMAGE} versões geradas")
-
-print(f"\n🎉 Concluído! {total_geradas} imagens aumentadas salvas em '{OUTPUT_IMG_DIR}'")
-print("👉 Agora rode o treino normalmente com: model.train(data='campos.yaml', epochs=100)")
