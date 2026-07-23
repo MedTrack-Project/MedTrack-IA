@@ -15,7 +15,7 @@ dependencies = [
   "numpy==1.26.4",
   "opencv-python-headless>=4.9,<5",
   "pydantic-settings>=2.2,<3",
-  "python-multipart==0.0.9",
+  "python-multipart==0.0.32",
   "uvicorn==0.27.1",
 ]
 
