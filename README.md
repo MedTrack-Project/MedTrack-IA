@@ -1,167 +1,85 @@
-# MedTrack AI 🧠💊
-### Motor de Visão Computacional e OCR
+# MedTrack AI
 
-O **MedTrack AI** é o motor de inteligência artificial do ecossistema MedTrack. O sistema utiliza um modelo híbrido que combina **YOLOv8** (detecção e localização dos campos na embalagem) e **EasyOCR** (extração textual inteligente), servindo dados estruturados em JSON para o aplicativo mobile em Kotlin via **FastAPI**.
+Serviço de inferência de visão computacional do ecossistema acadêmico MedTrack.
+Ele expõe uma API HTTP com FastAPI e organiza o ciclo de vida do modelo de
+detecção e extração de texto, além das ferramentas de treinamento associadas.
 
----
+O projeto é um protótipo acadêmico. Suas previsões não substituem a conferência
+humana ou a orientação de profissionais de saúde.
 
-## 📦 Estrutura do Repositório
+## Componentes
 
-```
-MedTrack-IA/
-├── src/
-│   ├── api/
-│   │   ├── api.py              # Servidor FastAPI com suporte a medicamentos genéricos
-│   │   ├── ocr_extration.py    # Módulo de processamento de crops e chamadas ao EasyOCR
-│   │   ├── labeling.py         # Ferramenta de anotação manual do dataset via OpenCV
-│   │   └── augmentation.py     # Pipeline de Data Augmentation
-│   └── training/
-│       └── train.py            # Script de fine-tuning do YOLOv8
-├── config/
-│   └── campos.yaml             # Configuração das 6 classes do dataset
-├── data/                       # Imagens brutas (não versionadas no Git)
-├── dataset/                    # Dataset gerado pelo labeling (não versionado no Git)
-├── requirements.txt
-└── README.md
-```
+| Área | Responsabilidade |
+| --- | --- |
+| `src/medtrack_ai/api` | Aplicação FastAPI, contrato HTTP, health checks e observabilidade. |
+| `src/medtrack_ai/inference` | Carregamento e execução do modelo de inferência. |
+| `src/medtrack_ai/model_registry` | Leitura e validação do manifesto do artefato de modelo. |
+| `src/training` | Ferramentas de treinamento e aumento de dados. |
+| `config/training` | Configuração versionada do dataset e das classes de treinamento. |
+| `tests` | Testes unitários, de integração e smoke tests opcionais do modelo. |
 
----
+Dados de treinamento, pesos e resultados de execução não são versionados. O
+artefato de inferência é recuperado de um GitHub Release e validado por checksum.
 
-## 🎯 Classes Detectadas
+## Início rápido
 
-| ID | Classe | Descrição |
-|----|--------|-----------|
-| 0 | `nome` | Nome comercial do medicamento |
-| 1 | `agente_ativo` | Princípio ativo |
-| 2 | `dosagem` | Concentração/dosagem |
-| 3 | `validade` | Data de validade |
-| 4 | `quantidade` | Quantidade de unidades |
-| 5 | `generico` | Tarja/logo de medicamento genérico |
+O caminho recomendado para desenvolvimento da API é Docker Compose. São
+necessários Docker Desktop, Python 3.11 e `uv` para recuperar o modelo local.
 
----
-
-## 🛠️ Como Rodar Localmente
-
-### 1. Pré-requisitos
-
-- **Python 3.10 ou superior**
-- Drivers NVIDIA + **CUDA Toolkit** (opcional, recomendado para GTX 1650+)
-
-### 2. Clonar e instalar dependências
-
-```bash
-git clone https://github.com/MClaraFerreira5/MedTrack-IA.git
-cd MedTrack-IA
-pip install -r requirements.txt
+```powershell
+Copy-Item .env.example .env
+uv run --group dev python scripts/fetch_model.py
+docker compose up --build
 ```
 
-### 3. Baixar os pesos do modelo (`best.pt`)
+Após a inicialização:
 
-Os pesos do modelo treinado **não são versionados no Git** por boas práticas. Para obtê-los:
-
-1. Acesse a aba **Releases** deste repositório
-2. Baixe o arquivo `best.pt` da última versão estável
-3. Coloque o arquivo no caminho:
-
-```
-src/training/runs/detect/medtrack_yolo_train/weights/best.pt
+```powershell
+Invoke-WebRequest http://localhost:8000/healthz
+Invoke-WebRequest http://localhost:8000/readyz
 ```
 
-### 4. Iniciar o servidor
+Para encerrar o ambiente:
 
-```bash
-python src/api/api.py
+```powershell
+docker compose down
 ```
 
-A API estará disponível em:
-- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Endpoint principal:** `POST http://localhost:8000/detect`
+Consulte o [guia de contêiner](docs/CONTAINER.md) para os pré-requisitos,
+execução sem Compose e detalhes do modelo local.
 
----
+## Desenvolvimento e qualidade
 
-## 📱 Integração com o App Mobile (Kotlin)
-
-O celular físico ou emulador não enxerga `localhost` diretamente. Use as configurações abaixo no seu cliente Retrofit:
-
-| Ambiente | URL Base |
-|----------|----------|
-| Emulador Android nativo | `http://10.0.2.2:8000` |
-| Celular físico (Wi-Fi) | URL gerada pelo [Ngrok](https://ngrok.com) |
-
-**Para usar o Ngrok:**
-```bash
-ngrok http 8000
-# Use a URL gerada: https://xxxx.ngrok-free.app/detect
+```powershell
+uv sync --group dev
+uv run --group dev pytest
+uv run --group dev ruff check src tests scripts
+uv run --group dev pyright src/medtrack_ai tests scripts
 ```
 
----
+A estratégia de testes e os comandos opcionais estão em
+[docs/TESTING.md](docs/TESTING.md). Pull requests são validados pelos workflows
+descritos em [docs/CI_CD.md](docs/CI_CD.md).
 
-## 🔁 Pipeline de IA
+## Documentação
 
-```
-[Imagem do App Mobile]
-        │
-        ▼ (resize para 640px)
-[Imagem Otimizada]
-        │
-        ▼
-┌─────────────────────────┐
-│   YOLOv8 Nano (GPU)     │ ──► Detecta campos + tarja genérico
-└─────────────────────────┘
-        │
-        ├──► [Tarja genérico detectada] ──► nome = "Medicamento Genérico"
-        │
-        └──► [Crops dos outros campos]
-                    │
-                    ▼
-        ┌───────────────────────┐
-        │   EasyOCR (GPU/CPU)   │ ──► Extrai texto de cada campo
-        └───────────────────────┘
-                    │
-                    ▼
-             JSON estruturado
-```
+| Tema | Documento |
+| --- | --- |
+| Contrato HTTP | [docs/contracts/api-v1.md](docs/contracts/api-v1.md) |
+| Artefato e versão do modelo | [docs/models/README.md](docs/models/README.md) |
+| Contêiner local | [docs/CONTAINER.md](docs/CONTAINER.md) |
+| CI/CD e versionamento | [docs/CI_CD.md](docs/CI_CD.md) |
+| Deploy de staging | [docs/RAILWAY.md](docs/RAILWAY.md) |
+| Decisões arquiteturais | [docs/adr/README.md](docs/adr/README.md) |
+| Governança | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 
-**Exemplo de resposta:**
-```json
-{
-  "status": "success",
-  "data": {
-    "nome": "Astro",
-    "agente_ativo": "Sinvastatina",
-    "dosagem": "500mg",
-    "validade": "10/2026",
-    "quantidade": "30 comprimidos",
-    "is_generico": false
-  }
-}
-```
-## 📊 Governança de Dados e Dataset (YOLOv8)
+## Contribuição e segurança
 
-Para cumprir os requisitos de reprodutibilidade científica e técnica do modelo, o dataset completo utilizado para o treinamento do `best.pt` foi estruturado e disponibilizado externamente (evitando inflar o tamanho do repositório Git).
+O repositório é restrito aos integrantes do projeto MedTrack. As regras de
+contribuição, revisão e responsáveis estão em [CONTRIBUTING.md](CONTRIBUTING.md).
+Relatos de vulnerabilidade devem seguir [SECURITY.md](SECURITY.md), e não ser
+publicados em issues.
 
-* 🔗 **Link de Acesso ao Dataset Estruturado (.zip):** [Link_do_Google_Drive](https://drive.google.com/file/d/1kFx1Vbpx1E5vtfPsAJBaApEtnxy1iSfs/view?usp=sharing)
+## Licença
 
-### 🧬 Estrutura do Arquivo Disponibilizado
-O arquivo compactado segue rigorosamente a arquitetura de diretórios do ecossistema Ultralytics, emparelhando cada imagem ao seu respectivo arquivo de anotação bounding-box (`.txt`):
-* `/train/images/` e `/train/labels/` (Conjunto de treino)
-* `/val/images/` e `/val/labels/` (Conjunto de validação e métricas de acurácia)
-* `campos.yaml` (Mapeamento de caminhos relativos e indexação das classes de fármacos)
----
-
-## ⚠️ Aviso de Uso Responsável
-
-O **MedTrack AI** é um protótipo assistivo desenvolvido para fins **acadêmicos**. O processamento visual e a extração de dados de embalagens são baseados em previsões probabilísticas.
-
-Este sistema **NÃO substitui**, em nenhuma hipótese:
-- A conferência visual humana da receita médica e da embalagem física
-- A orientação de profissionais de saúde qualificados (médicos, farmacêuticos, enfermeiros)
-
-Qualquer utilização em cenários reais deve contar com **dupla checagem humana** para garantir a segurança na administração de medicamentos.
-
----
-
-
-## 📄 Licença
-
-Projeto acadêmico — Engenharia da Computação · 2026
+O código está licenciado sob a [MIT License](LICENSE).
